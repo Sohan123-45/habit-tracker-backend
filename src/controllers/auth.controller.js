@@ -4,6 +4,7 @@ const bcrypt=require("bcryptjs");
 
 async function registerUser(req,res){
     try {    
+        const { username, email, password } = req.body;
         const hash=await bcrypt.hash(password,10);
     
         const user=await userModel.create({
