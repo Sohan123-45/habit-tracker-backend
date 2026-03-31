@@ -23,6 +23,7 @@ async function registerUser(req,res){
         res.cookie("token",token,{
             httpOnly: true,
             secure: true, // use true in production (HTTPS)
+            sameSite: "None",
             maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
     
@@ -76,6 +77,7 @@ async function loginUser(req,res){
         res.cookie("token",token,{
             httpOnly: true, //js cannot access cookie
             secure: true, //security concerns (HTTPS)
+            sameSite: "None",
             maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
         });
     
