@@ -6,9 +6,6 @@ const adminRoutes=require("./routes/admin.routes");
 var cookieParser = require('cookie-parser');
 const cors=require("cors");
 
-app.use(express.json());
-app.use(cookieParser());
-
 // Secure CORS setup for frontend access
 const allowedOrigins = [
   "http://localhost:5173",
@@ -31,6 +28,9 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization", "Accept"],
 }));
 
+
+app.use(express.json());
+app.use(cookieParser());
 
 app.use('/api/auth',authRoutes);
 app.use('/api/habits',habitRoutes);
