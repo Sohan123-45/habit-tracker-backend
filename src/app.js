@@ -6,6 +6,8 @@ const adminRoutes=require("./routes/admin.routes");
 var cookieParser = require('cookie-parser');
 const cors=require("cors");
 
+app.set("trust proxy", 1);
+
 // Secure CORS setup for frontend access
 const allowedOrigins = [
   "http://localhost:5173",
