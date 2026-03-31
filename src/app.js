@@ -10,22 +10,26 @@ const cors=require("cors");
 const allowedOrigins = [
   "http://localhost:5173",
   process.env.FRONTEND,
-];
+].filter(Boolean);
 
+// ✅ CORS middleware FIRST
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests like Postman / mobile apps (no origin)
+  origin: function (origin, callback) {
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    console.log("Blocked by CORS:", origin);
     return callback(new Error(`CORS not allowed: ${origin}`));
   },
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "Accept"],
+}));
+
+// ✅ VERY IMPORTANT: handle preflight
+app.options("*", cors({
+  origin: allowedOrigins,
+  credentials: true,
 }));
 
 
