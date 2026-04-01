@@ -21,13 +21,6 @@ async function registerUser(req,res){
             { expiresIn: "1d" }
         );
     
-        res.cookie("token",token,{
-            httpOnly: true,
-            secure: true, // use true in production (HTTPS)
-            sameSite: "None",
-            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
-        });
-    
         return res.status(201).json({
             message:"User registered successfully",
             user:{
@@ -35,7 +28,8 @@ async function registerUser(req,res){
                 username: user.username,
                 email: user.email,
                 role: user.role
-            }
+            },
+            token
         })
     } catch (err) {
         console.error(err);
@@ -75,13 +69,6 @@ async function loginUser(req,res){
         { expiresIn: "1d" }
         );
     
-        // res.cookie("token",token,{
-        //     httpOnly: true, //js cannot access cookie
-        //     secure: true, //security concerns (HTTPS)
-        //     sameSite: "None",
-        //     maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
-        // });
-    
         res.status(200).json({
             message:"Login Successful",
             user:{
@@ -99,19 +86,9 @@ async function loginUser(req,res){
 }
 
 async function logoutUser(req,res){
-    try {
-        res.clearCookie("token", {
-            httpOnly: true,
-            secure: true 
-        });
-    
-        return res.status(200).json({
-            message: "Logged out successfully"
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
+    return res.status(200).json({
+        message: "Logged out successfully"
+    });
 }
 
 module.exports={registerUser, loginUser,logoutUser}
