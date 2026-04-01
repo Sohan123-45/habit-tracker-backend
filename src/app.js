@@ -14,7 +14,7 @@ const allowedOrigins = [
   process.env.FRONTEND,
 ].filter(Boolean);
 
-app.use(cors({
+const corsOptions={
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
 
@@ -23,12 +23,12 @@ app.use(cors({
     }
 
     console.log("Blocked CORS:", origin); // 👈 debug
-    return callback(new Error(`CORS not allowed: ${origin}`));
+    return callback(null, false); 
   },
   credentials: true,
   methods: ["GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization","X-Requested-With"],
-}));
+};
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
 
