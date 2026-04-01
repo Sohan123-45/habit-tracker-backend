@@ -75,12 +75,12 @@ async function loginUser(req,res){
         { expiresIn: "1d" }
         );
     
-        res.cookie("token",token,{
-            httpOnly: true, //js cannot access cookie
-            secure: true, //security concerns (HTTPS)
-            sameSite: "None",
-            maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
-        });
+        // res.cookie("token",token,{
+        //     httpOnly: true, //js cannot access cookie
+        //     secure: true, //security concerns (HTTPS)
+        //     sameSite: "None",
+        //     maxAge: 24 * 60 * 60 * 1000 // 1 day in milliseconds
+        // });
     
         res.status(200).json({
             message:"Login Successful",
@@ -89,7 +89,8 @@ async function loginUser(req,res){
                 username:user.username,
                 email:user.email,
                 role:user.role
-            }
+            },
+            token
         })
     } catch (err) {
         console.error(err);
