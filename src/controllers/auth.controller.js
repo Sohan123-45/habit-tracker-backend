@@ -29,7 +29,6 @@ async function registerUser(req,res){
                 email: user.email,
                 role: user.role
             },
-            token
         })
     } catch (err) {
         console.error(err);
