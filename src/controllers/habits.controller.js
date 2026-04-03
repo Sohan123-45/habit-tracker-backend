@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const habitModel=require("../models/habit.model");
 const habitPostModel=require("../models/habitPost.model");
 const {uploadFile,deleteFile}=require("../services/storage.service");
@@ -258,7 +259,7 @@ async function getHabits(req, res) {
         const habits = await habitModel.aggregate([
             {
                 $match: {
-                    user: new require("mongoose").Types.ObjectId(userId)
+                    user: userId
                 }
             },
 
@@ -280,7 +281,8 @@ async function getHabits(req, res) {
                             input: "$posts",
                             as: "p",
                             in: {
-                                createdAt: "$$p.createdAt"
+                                createdAt: "$$p.createdAt",
+                                date: "$$p.date"
                             }
                         }
                     }
@@ -312,6 +314,8 @@ async function getHabits(req, res) {
                 lastEntryDate: habit.posts.length ? habit.posts[0].createdAt : null
             };
         });
+
+        console.log(updatedHabits)
 
         return res.status(200).json({
             message: "Habits fetched successfully",
