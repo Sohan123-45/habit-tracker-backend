@@ -263,6 +263,23 @@ async function getHabits(req,res){
                 message: "Habit not found or unauthorized"
             });
         }
+
+        for (let habit of habits) {
+            const posts = await habitPostModel.find({
+                habit: habit._id,
+                user: userId
+            }).sort({createdAt:-1});
+
+            const {currentStreak,longestStreak,count} = streakCounter(posts);
+
+            habit.streak = currentStreak;
+            habit.longestStreak = longestStreak;
+            habit.count = count;
+            habit.lastEntryDate = posts.length ? posts[0].createdAt : null;
+
+            await habit.save();
+        }
+
         return res.status(200).json({
             message: "Habits fetched successfully",
             count: habits.length,
