@@ -265,7 +265,7 @@ async function getHabits(req, res) {
             // 🔗 Join posts
             {
                 $lookup: {
-                    from: "habitPostModel", // collection name (IMPORTANT)
+                    from: "habitposts", // collection name (IMPORTANT)
                     localField: "_id",
                     foreignField: "habit",
                     as: "posts"
