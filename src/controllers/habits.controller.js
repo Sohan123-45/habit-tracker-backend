@@ -251,46 +251,75 @@ async function deleteHabit(req,res){
     }
 }
 
-async function getHabits(req,res){
-    try{
-        const userId=req.user.id;
-    
-        const habits=await habitModel.find({
-                user:userId
+async function getHabits(req, res) {
+    try {
+        const userId = req.user.id;
+
+        const habits = await habitModel.aggregate([
+            {
+                $match: {
+                    user: new require("mongoose").Types.ObjectId(userId)
+                }
+            },
+
+            // 🔗 Join posts
+            {
+                $lookup: {
+                    from: "habitPostModel", // collection name (IMPORTANT)
+                    localField: "_id",
+                    foreignField: "habit",
+                    as: "posts"
+                }
+            },
+
+            // 🧹 Keep only needed fields
+            {
+                $addFields: {
+                    posts: {
+                        $map: {
+                            input: "$posts",
+                            as: "p",
+                            in: {
+                                createdAt: "$$p.createdAt"
+                            }
+                        }
+                    }
+                }
+            },
+
+            // 📊 Sort posts newest first
+            {
+                $addFields: {
+                    posts: {
+                        $sortArray: {
+                            input: "$posts",
+                            sortBy: { createdAt: -1 }
+                        }
+                    }
+                }
             }
-        ).sort({date:-1,createdAt:-1});
-        if(!habits||habits.length===0){
-            return res.status(404).json({
-                message: "Habit not found or unauthorized"
-            });
-        }
+        ]);
 
-        const updatedHabits = await Promise.all(
-            habits.map(async (habit) => {
-                const posts = await habitPostModel.find({
-                    habit: habit._id,
-                    user: userId
-                }).select("createdAt")
-                .sort({createdAt:-1});
+        // 🔥 Now compute streak in JS (fast, no DB calls)
+        const updatedHabits = habits.map(habit => {
+            const { currentStreak, longestStreak, count } = streakCounter(habit.posts);
 
-                const { currentStreak, longestStreak, count } = streakCounter(posts);
-
-                return {
-                    ...habit.toObject(),
-                    streak: currentStreak,
-                    longestStreak,
-                    count,
-                    lastEntryDate: posts.length ? posts[0].createdAt : null
-                };
-            })
-        );
+            return {
+                ...habit,
+                streak: currentStreak,
+                longestStreak,
+                count,
+                lastEntryDate: habit.posts.length ? habit.posts[0].createdAt : null
+            };
+        });
 
         return res.status(200).json({
             message: "Habits fetched successfully",
             count: updatedHabits.length,
             habits: updatedHabits
         });
-    }catch(err){
+
+    } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Internal Server Error" });
     }
