@@ -317,8 +317,6 @@ async function getHabits(req, res) {
             };
         });
 
-        console.log(updatedHabits)
-
         return res.status(200).json({
             message: "Habits fetched successfully",
             count: updatedHabits.length,
