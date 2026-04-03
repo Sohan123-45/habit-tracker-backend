@@ -17,6 +17,36 @@ function streakCounter(posts){
         uniqueDays.sort((a,b)=>b-a); //latest to oldest
 
         const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        const lastLogDate = new Date(uniqueDays[0]);
+
+        const diffFromToday = Math.floor((today - lastLogDate) / MS_PER_DAY);
+
+        // ❌ If user missed more than 1 day → streak = 0
+        if (diffFromToday > 1) {
+            // still calculate longest streak
+            let longestStreak = 1;
+            let tempStreak = 1;
+
+            for(let i = 1; i < uniqueDays.length; i++){
+                const diffDays = Math.floor((uniqueDays[i-1] - uniqueDays[i]) / MS_PER_DAY);
+
+                if(diffDays === 1) tempStreak++;
+                else tempStreak = 1;
+
+                longestStreak = Math.max(longestStreak, tempStreak);
+            }
+
+            return {
+                currentStreak: 0,
+                longestStreak,
+                count: posts.length
+            };
+        }
+
         let currentStreak = 1;
         let longestStreak = 1;
 

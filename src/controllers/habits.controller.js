@@ -93,6 +93,7 @@ async function logHabit(req,res){
             habit:habitId,
             user:id
         }).sort({createdAt:-1});
+        
         const {currentStreak,longestStreak,count}=streakCounter(posts)
 
         habit.count=count;
@@ -258,32 +259,36 @@ async function getHabits(req,res){
                 user:userId
             }
         ).sort({date:-1,createdAt:-1});
-        if(!habits){
+        if(!habits||habits.length===0){
             return res.status(404).json({
                 message: "Habit not found or unauthorized"
             });
         }
 
-        for (let habit of habits) {
-            const posts = await habitPostModel.find({
-                habit: habit._id,
-                user: userId
-            }).sort({createdAt:-1});
+        const updatedHabits = await Promise.all(
+            habits.map(async (habit) => {
+                const posts = await habitPostModel.find({
+                    habit: habit._id,
+                    user: userId
+                }).select("createdAt")
+                .sort({createdAt:-1});
 
-            const {currentStreak,longestStreak,count} = streakCounter(posts);
+                const { currentStreak, longestStreak, count } = streakCounter(posts);
 
-            habit.streak = currentStreak;
-            habit.longestStreak = longestStreak;
-            habit.count = count;
-            habit.lastEntryDate = posts.length ? posts[0].createdAt : null;
-
-            await habit.save();
-        }
+                return {
+                    ...habit.toObject(),
+                    streak: currentStreak,
+                    longestStreak,
+                    count,
+                    lastEntryDate: posts.length ? posts[0].createdAt : null
+                };
+            })
+        );
 
         return res.status(200).json({
             message: "Habits fetched successfully",
-            count: habits.length,
-            habits
+            count: updatedHabits.length,
+            habits: updatedHabits
         });
     }catch(err){
         console.error(err);
