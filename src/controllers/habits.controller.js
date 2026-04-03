@@ -259,7 +259,9 @@ async function getHabits(req, res) {
         const habits = await habitModel.aggregate([
             {
                 $match: {
-                    user: userId
+                    user: mongoose.Types.ObjectId.isValid(userId)
+    ? new mongoose.Types.ObjectId(userId)
+    : userId
                 }
             },
 
